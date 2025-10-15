@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CogniDoc - Intelligent Document Parsing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .tab-content {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900">CogniDoc</h1>
+            <p class="text-lg text-gray-600 mt-2">Your Intelligent Document Parsing Assistant</p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div class="mb-6 border-b border-gray-200">
+            <nav class="flex -mb-px space-x-6" aria-label="Tabs">
+                <button onclick="changeTab('invoice')" id="tab-invoice" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-indigo-600 border-indigo-500">
+                    Invoice Parsing
+                </button>
+                <button onclick="changeTab('research')" id="tab-research" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 border-transparent">
+                    Research Assistant
+                </button>
+                <button onclick="changeTab('datastore')" id="tab-datastore" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 border-transparent">
+                    Datastore Q&A
+                </button>
+                <button onclick="changeTab('finetune')" id="tab-finetune" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 border-transparent">
+                    Expand Knowledge Base
+                </button>
+            </nav>
+        </div>
+
+        <!-- Tab Content -->
+        <main>
+            <!-- Invoice Parsing Tab -->
+            <div id="content-invoice" class="tab-content">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-semibold mb-4">Parse an Invoice</h2>
+                    <p class="text-gray-600 mb-6">Upload an invoice image (JPEG, PNG) or a PDF document to automatically extract key information.</p>
+                    <form id="invoice-form">
+                        <div class="mb-4">
+                            <label for="invoice-file" class="block text-sm font-medium text-gray-700 mb-2">Invoice Document</label>
+                            <input type="file" id="invoice-file" name="file" accept="image/jpeg, image/png, application/pdf" required class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition">
+                            Parse Invoice
+                        </button>
+                    </form>
+                    <div id="invoice-result" class="mt-6"></div>
+                </div>
+            </div>
+
+            <!-- Research Assistant Tab -->
+            <div id="content-research" class="tab-content hidden">
+                 <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-semibold mb-4">Analyze a Single Document</h2>
+                    <p class="text-gray-600 mb-6">Upload a document for a one-time analysis. The model will use only the content of this document to answer your questions.</p>
+                    <form id="research-form">
+                        <div class="mb-4">
+                            <label for="research-file" class="block text-sm font-medium text-gray-700 mb-2">Upload Document for Analysis</label>
+                            <input type="file" id="research-file" name="file" required class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                        </div>
+                        <fieldset class="mb-4">
+                            <legend class="block text-sm font-medium text-gray-700 mb-2">Query Type</legend>
+                            <div class="flex items-center space-x-6">
+                                <label class="flex items-center"><input type="radio" name="prompt_type" value="summary" checked class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"> <span class="ml-2 text-sm">Summary</span></label>
+                                <label class="flex items-center"><input type="radio" name="prompt_type" value="questions" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"> <span class="ml-2 text-sm">Study Questions</span></label>
+                                <label class="flex items-center"><input type="radio" name="prompt_type" value="custom" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"> <span class="ml-2 text-sm">Custom Question</span></label>
+                            </div>
+                        </fieldset>
+                        <div id="custom-question-div" class="mb-4 hidden">
+                            <label for="custom-question" class="block text-sm font-medium text-gray-700 mb-2">Your Question</label>
+                            <textarea id="custom-question" name="custom_question" rows="3" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., What was the main conclusion of the study?"></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition">
+                            Get Answer
+                        </button>
+                    </form>
+                    <div id="research-result" class="mt-6"></div>
+                </div>
+            </div>
+
+            <!-- Datastore Q&A Tab -->
+            <div id="content-datastore" class="tab-content hidden">
+                 <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-semibold mb-4">Ask Your Datastore</h2>
+                    <p class="text-gray-600 mb-6">Ask a question to your entire knowledge base. The system will search all indexed documents to find the most relevant answer.</p>
+                    <form id="datastore-form">
+                        <div class="mb-4">
+                            <label for="datastore-question" class="block text-sm font-medium text-gray-700 mb-2">Your Question</label>
+                            <textarea id="datastore-question" name="custom_question" rows="4" required class="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., Compare the methodologies of the papers on machine learning."></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition">
+                            Ask Question
+                        </button>
+                    </form>
+                    <div id="datastore-result" class="mt-6"></div>
+                </div>
+            </div>
+
+            <!-- Fine-Tuning Tab -->
+            <div id="content-finetune" class="tab-content hidden">
+                 <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-semibold mb-4">Expand Knowledge Base</h2>
+                    <p class="text-gray-600 mb-6">Upload new documents (e.g., research papers, articles) to add them to the knowledge base for the Q&A tab.</p>
+                    <form id="finetune-form">
+                        <div class="mb-4">
+                            <label for="finetune-file" class="block text-sm font-medium text-gray-700 mb-2">Document File</label>
+                            <input type="file" id="finetune-file" name="file" required class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition">
+                            Upload Document
+                        </button>
+                    </form>
+                    <div id="finetune-result" class="mt-6"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'API_URL_PLACEHOLDER';
+        let latestInvoiceData = null; // Store invoice data for download
+
+        // --- Tab Management ---
+        const tabs = ['invoice', 'research', 'datastore', 'finetune'];
+        const tabButtons = {
+            invoice: document.getElementById('tab-invoice'),
+            research: document.getElementById('tab-research'),
+            datastore: document.getElementById('tab-datastore'),
+            finetune: document.getElementById('tab-finetune')
+        };
+        const tabContents = {
+            invoice: document.getElementById('content-invoice'),
+            research: document.getElementById('content-research'),
+            datastore: document.getElementById('content-datastore'),
+            finetune: document.getElementById('content-finetune')
+        };
+
+        function changeTab(tabName) {
+            tabs.forEach(tab => {
+                const button = tabButtons[tab];
+                const content = tabContents[tab];
+                if (tab === tabName) {
+                    button.classList.add('text-indigo-600', 'border-indigo-500');
+                    button.classList.remove('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'border-transparent');
+                    content.classList.remove('hidden');
+                } else {
+                    button.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'border-transparent');
+                    button.classList.remove('text-indigo-600', 'border-indigo-500');
+                    content.classList.add('hidden');
+                }
+            });
+        }
+
+        // --- Loading and Result Display ---
+        function showLoading(resultDiv) {
+            resultDiv.innerHTML = '<div class="flex justify-center items-center p-4"><div class="loader"></div></div>';
+        }
+        
+        function showError(resultDiv, message) {
+            resultDiv.innerHTML = `<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative" role="alert"><strong class="font-bold">Error:</strong><span class="block sm:inline ml-2">${message}</span></div>`;
+        }
+        
+        function showAnswer(resultDiv, answer) {
+             let resultHtml = `<h3 class="text-xl font-semibold mb-3">Answer</h3><div class="prose max-w-none p-4 bg-gray-50 rounded-lg border">${answer.replace(/\n/g, '<br>')}</div>`;
+             resultDiv.innerHTML = resultHtml;
+        }
+
+        // --- Invoice Parsing Logic ---
+        const invoiceForm = document.getElementById('invoice-form');
+        const invoiceResultDiv = document.getElementById('invoice-result');
+        
+        invoiceForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading(invoiceResultDiv);
+            latestInvoiceData = null;
+            
+            const formData = new FormData(invoiceForm);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/parse-invoice/`, {
+                    method: 'POST',
+                    body: formData,
+                });
+                
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Failed to parse invoice.');
+                }
+                
+                latestInvoiceData = data; // Save data for download
+                let resultHtml = `
+                    <div class="flex justify-between items-center mb-3">
+                         <h3 class="text-xl font-semibold">Extracted Information</h3>
+                         <button id="download-json-btn" class="bg-green-500 text-white text-sm font-semibold py-2 px-4 rounded-lg hover:bg-green-600 transition">Download JSON</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+
+                data.entities.forEach(entity => {
+                    resultHtml += `
+                        <div class="bg-gray-50 p-3 rounded-lg border">
+                            <p class="text-sm font-medium text-gray-500">${entity.type}</p>
+                            <p class="text-lg font-semibold text-gray-800">${entity.value}</p>
+                            <p class="text-xs text-gray-400">Confidence: ${Math.round(entity.confidence * 100)}%</p>
+                        </div>
+                    `;
+                });
+                resultHtml += '</div>';
+                invoiceResultDiv.innerHTML = resultHtml;
+
+                // Add event listener to the newly created button
+                document.getElementById('download-json-btn').addEventListener('click', downloadInvoiceJson);
+
+            } catch (error) {
+                showError(invoiceResultDiv, error.message);
+            }
+        });
+
+        function downloadInvoiceJson() {
+            if (!latestInvoiceData) return;
+            const jsonString = JSON.stringify(latestInvoiceData, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'invoice-data.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // --- Research Assistant (Single Document) Logic ---
+        const researchForm = document.getElementById('research-form');
+        const researchResultDiv = document.getElementById('research-result');
+        const customQuestionDiv = document.getElementById('custom-question-div');
+        
+        document.querySelectorAll('input[name="prompt_type"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                customQuestionDiv.classList.toggle('hidden', e.target.value !== 'custom');
+            });
+        });
+
+        researchForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading(researchResultDiv);
+
+            const formData = new FormData(researchForm);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/analyze-paper/`, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Failed to get answer.');
+                }
+                showAnswer(researchResultDiv, data.answer);
+
+            } catch (error) {
+                showError(researchResultDiv, error.message);
+            }
+        });
+
+        // --- Datastore Q&A Logic ---
+        const datastoreForm = document.getElementById('datastore-form');
+        const datastoreResultDiv = document.getElementById('datastore-result');
+
+        datastoreForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading(datastoreResultDiv);
+            
+            const formData = new FormData(datastoreForm);
+            formData.append('prompt_type', 'custom'); // We always use custom prompt for this tab
+
+            try {
+                 const response = await fetch(`${API_BASE_URL}/datastore_qa/`, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Failed to get answer from datastore.');
+                }
+                showAnswer(datastoreResultDiv, data.answer);
+            } catch (error) {
+                showError(datastoreResultDiv, error.message);
+            }
+        });
+
+
+        // --- Fine-Tuning Logic ---
+        const finetuneForm = document.getElementById('finetune-form');
+        const finetuneResultDiv = document.getElementById('finetune-result');
+        
+        finetuneForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading(finetuneResultDiv);
+            
+            const formData = new FormData(finetuneForm);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/upload-finetune/`, {
+                    method: 'POST',
+                    body: formData,
+                });
+                
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Failed to upload file.');
+                }
+                
+                // Display only the success message from the backend
+                const resultHtml = `
+                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg" role="alert">
+                        <p class="font-bold">Success!</p>
+                        <p>${data.message}</p>
+                    </div>
+                `;
+                finetuneResultDiv.innerHTML = resultHtml;
+                finetuneForm.reset();
+
+            } catch (error) {
+                showError(finetuneResultDiv, error.message);
+            }
+        });
+    </script>
+
+</body>
+</html>
+

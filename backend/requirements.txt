@@ -1,0 +1,11 @@
+fastapi
+gunicorn
+uvicorn[standard]
+python-multipart
+google-api-core
+google-cloud-documentai
+google-auth
+uuid
+google-cloud-storage
+vertexai
+google-cloud-discoveryengine
