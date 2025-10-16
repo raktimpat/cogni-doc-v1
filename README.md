@@ -2,6 +2,8 @@
 
 A FastAPI backend for parsing and querying documents using Google Cloud AI services.
 
+[Live Demo](https://cogni-doc.vercel.app/)
+
 ## Features
 
 - **Invoice Parsing**: Extract structured data from invoice images/PDFs using Document AI
