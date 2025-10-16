@@ -78,9 +78,3 @@ Deploy to Google Cloud Run:
 gcloud builds submit --tag gcr.io/YOUR_PROJECT_ID/cognidoc
 gcloud run deploy cognidoc --image gcr.io/YOUR_PROJECT_ID/cognidoc --platform managed
 ```
-
-See `DEPLOYMENT.md` for detailed instructions.
-
-## License
-
-MIT
